@@ -1,0 +1,18 @@
+The Features which are live are :
+[ Relised date : 6 Mar 2021]
+1. /start - Complete Bio of me.
+
+Whats New :
+[ Relised date : 7 Mar 2021]
+1. /whatsnew or /help -  To see any new feature has added or not/ which features are live now.
+2. /feedback - you can give your feedback for our ferther development.
+3. /saythought or /quote - it will say you a thoughts..
+4. /startecho - it will start echoing your all text and stickers input...
+   /stopecho - it will stop echoing...
+
+Upcoming Features :
+[ Relised date : ~~ ~~ 20~~]
+1. /bdaywish - Birthday wish to your love once...
+2. /iamsad - You can start expressing your sadness when you don't have anyone to share.
+3. /iamhappy - You can start expressing your happiest movement when you don't have anyone to share.
+4. /satisfied - It will stop listening your happy/sad movement.

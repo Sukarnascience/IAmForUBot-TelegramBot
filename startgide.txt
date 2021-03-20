@@ -1,0 +1,38 @@
+Hello!,
+    Great to see you here.
+Hi it's me 'IAmForUBot' as the name suggest i will be tring my level best to be your best friend at you Happy & Sad time.. 
+and many more....
+
+Bot Developer :- 
+Sukarna Jana ( @SukarnaJana )
+Bot R&D is handle by :-
+Vandita Kanwar ( @Vandita21 )
+Bot Birthday :- 6 March 2021
+
+You can control me by sending these commands :
+
+/start - Complete Bio of me.
+
+Wish any love once behalf of you at your absence :
+[Still on developing stage]
+/bdaywish - Birthday wish to your love once...
+
+Spend Time with you :
+[Still on developing stage]
+/iamsad - You can start expressing your sadness when you don't have anyone to share.
+/iamhappy - You can start expressing your happiest movement when you don't have anyone to share.
+/satisfied - It will stop listening your happy/sad movement.
+
+To Echo You:
+
+/startecho - it will start echoing your all text and stickers input...
+/stopecho - it will stop echoing...
+
+Others :
+
+/whatsnew or /help -  To see any new feature has added or not/ which features are live now.
+/feedback - you can give your feedback for our ferther development.
+/saythought or /quote - it will say you a thoughts..
+
+I will be keep on adding new features in upcomming days...
+Thanks for your support...
