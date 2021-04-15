@@ -2,8 +2,9 @@ from telegram import *
 from telegram.ext import *
 import random
 import json
+import AdminBot
 
-APIKey = "<---- here is my key ---->"
+APIKey = "<-- Your Key -->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
@@ -31,14 +32,6 @@ def StartChatting(update:Update,context:CallbackContext):
         chat_id = update.effective_chat.id,
         text = datatoRead("startgide.txt")
     )
-
-def userSaidbye(update:Update,context:CallbackContext):
-    whatUsersaidnow = update.message.text
-    if(whatUsersaidnow in ["bye","bubye","byeeeee","Bye","ttyl"]):
-        MyBot.send_message(
-            chat_id = update.effective_chat.id,
-            text = "Bye bye dear... it was great to spend time with you."
-        )
 
 def TheNewthings(update:Update,context:CallbackContext):
     MyBot.send_message(
@@ -98,11 +91,13 @@ def stopingEcho(update:Update,context:CallbackContext):
 
 STEP1,STEP2,STEP3,STEP4,STEP5,STEP6 = range(6)
 UsernameOfBday = BdayDate = SenderName = modeUserSet = greatingMSGfromUser = None
+BdayWishDetails = {}
 def StartBdayProcess(update:Update,context:CallbackContext):
     MyBot.send_message(
         chat_id = update.effective_chat.id,
         text = "Ok, So, You want to wish you love once.\nWhat is the person username to whome you want to wish? eg:[@IAmForUBot]"
     )
+    BdayWishDetails["User Bday list"]=[]
     return STEP1
 def listenUsername(update:Update,context:CallbackContext):
     global UsernameOfBday
@@ -155,6 +150,7 @@ def ifUsergreet(update:Update,context:CallbackContext):
             text = "Well Done, all task completed see the review :"
         )
     else:
+        greatingMSGfromUser = None
         MyBot.send_message(
             chat_id = update.effective_chat.id,
             text = "Well Done, all task completed see the review :"
@@ -175,12 +171,24 @@ def isUsersatisfied(update:Update,context:CallbackContext):
             chat_id = update.effective_chat.id,
             text = "Greating Card is ready... Your msg will send to {} at currect time :)".format(UsernameOfBday)
         )
+        BdayWishDetails["User Bday list"].append({
+            "Sender User ID":"{}".format(update.effective_chat.id),
+            "Recever User Account Name":UsernameOfBday,
+            "Bday Date":BdayDate,
+            "User calls":SenderName,
+            "User alloud card making":modeUserSet,
+            "Sender Greet data":greatingMSGfromUser
+        })
+        outBdaylist = open("bdaylist.json",'a')
+        json.dump(BdayWishDetails,outBdaylist)
+        outBdaylist.close()
     else:
          MyBot.send_message(
             chat_id = update.effective_chat.id,
             text = "Greating Card canceled :( \nI am extreamly sorry that i am faild to not satisfied your needs\nWant to give any feedback from which i can improve myself [ /feedback ]"
         )
     return ConversationHandler.END  
+
 
 ForHappy,Satisfied = range(2)
 ForSad,Satisfied = range(2)
@@ -231,6 +239,7 @@ def iAmSatisfied(update:Update,context:CallbackContext):
 def mainControl():
     StartChat = CommandHandler("start",StartChatting)
     WhatsNew = CommandHandler(["whatsnew","help"],TheNewthings)
+    AdminGide = CommandHandler("admingide",AdminBot.adminGide)
     FeedBack = ConversationHandler(
         entry_points=[CommandHandler("feedback",UserFeedBack)],
         states={sendingfeed:[MessageHandler(Filters.text,feedbacktyper)]},
@@ -277,15 +286,24 @@ def mainControl():
         },
         fallbacks=[CommandHandler("satisfied",iAmSatisfied)]
     )
-    byebyeuser = MessageHandler(Filters.text,userSaidbye)
+    AdminPass = ConversationHandler(
+        entry_points=[CommandHandler(["admin"],AdminBot.AdminAccis)],
+        states={
+            AdminBot.VerifyPassword:[MessageHandler(Filters.text,AdminBot.AdminOwnership)]
+        },
+        fallbacks=[MessageHandler(Filters.text,AdminBot.AdminOwnership)]
+    )
+    Admincontrol = MessageHandler(Filters.text,AdminBot.control)
 
+    DispatchUpToBot.add_handler(AdminPass)
     DispatchUpToBot.add_handler(StartChat)
+    DispatchUpToBot.add_handler(AdminGide)
     DispatchUpToBot.add_handler(WhatsNew)
     DispatchUpToBot.add_handler(FeedBack)
     DispatchUpToBot.add_handler(Thought)
     DispatchUpToBot.add_handler(EchoState)
     DispatchUpToBot.add_handler(BdayWish)
-    DispatchUpToBot.add_handler(byebyeuser)
+    DispatchUpToBot.add_handler(Admincontrol)
     DispatchUpToBot.add_handler(FeelingToSayHappy)
     DispatchUpToBot.add_handler(FeelingToSaySad)
 
