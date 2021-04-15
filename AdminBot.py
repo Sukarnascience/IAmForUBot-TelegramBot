@@ -2,7 +2,7 @@ from telegram import *
 from telegram.ext import *
 import MainBot
 
-APIKey = "1607299983:AAHPq93CT_V3wx6NZKduwSgrI4dEWhSrlUs"
+APIKey = "<-- Your Key -->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
