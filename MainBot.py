@@ -4,7 +4,7 @@ import random
 import json
 import AdminBot
 
-APIKey = "<-- Your Key -->"
+APIKey = "<-- User Key -->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
@@ -32,6 +32,10 @@ def StartChatting(update:Update,context:CallbackContext):
         chat_id = update.effective_chat.id,
         text = datatoRead("startgide.txt")
     )
+    if(str(update.effective_chat.id) not in AdminBot.userIDlist()):
+        addNewuser = open("userID.txt",'a')
+        addNewuser.write("{}\n".format(update.effective_chat.id))
+        addNewuser.close()
 
 def TheNewthings(update:Update,context:CallbackContext):
     MyBot.send_message(
@@ -293,9 +297,18 @@ def mainControl():
         },
         fallbacks=[MessageHandler(Filters.text,AdminBot.AdminOwnership)]
     )
+    NoticeSender = ConversationHandler(
+        entry_points=[CommandHandler(["notice"],AdminBot.notice)],
+        states={
+            AdminBot.sendnoticetousers:[MessageHandler(Filters.text,AdminBot.sendnotice)]
+        },
+        fallbacks=[MessageHandler(Filters.text,AdminBot.sendnotice)]
+    )
+
     Admincontrol = MessageHandler(Filters.text,AdminBot.control)
 
     DispatchUpToBot.add_handler(AdminPass)
+    DispatchUpToBot.add_handler(NoticeSender)
     DispatchUpToBot.add_handler(StartChat)
     DispatchUpToBot.add_handler(AdminGide)
     DispatchUpToBot.add_handler(WhatsNew)
