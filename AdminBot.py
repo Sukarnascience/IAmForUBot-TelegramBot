@@ -2,8 +2,9 @@ from telegram import *
 from telegram.ext import *
 import MainBot
 import random
+import json
 
-APIKey = "<-- User Key -->"
+APIKey = "<---- bot key ---->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
@@ -19,16 +20,23 @@ def AdminAccis(update:Update,context:CallbackContext):
 
 def AdminOwnership(update:Update,context:CallbackContext):
     password = update.message.text
-    passwdFile = open("passwdFile.txt",'r')
-    seepasswd = passwdFile.readline()
-    if(password==seepasswd):
+    passwdFile = open("botData.json",'r')
+    dataFetched = json.load(passwdFile) 
+    seepasswd = dataFetched['password']
+    passwdFile.close()
+    if(password.lower()==seepasswd):
         MyBot.send_message(
             chat_id = update.effective_chat.id,
             text = "Hello Sir/Mam,\nGreat to see you here.. to see gides click on\n[ /Admingide ]"
         )
-        AccessPass = open("SpecialControlPass.txt",'a')
-        AccessPass.write("{}\n".format(update.effective_chat.id))
-        AccessPass.close()
+        CAccessPass = open("botData.json",'r')
+        CeditAccessdata = json.load(CAccessPass)
+        CAccessPass.close()
+        if(int(update.effective_chat.id) not in CeditAccessdata["admin"]):
+            AccessPass = open("botData.json",'w')
+            CeditAccessdata["admin"].append(int(update.effective_chat.id))
+            json.dump(CeditAccessdata,AccessPass,indent=4)
+            AccessPass.close()
 
     else:
         MyBot.send_message(
@@ -38,24 +46,22 @@ def AdminOwnership(update:Update,context:CallbackContext):
     return ConversationHandler.END
 
 def userIDlist():
-    IDList = []
-    ID = open("userID.txt",'r')
-    userId = ID.readlines()
-    for i in userId:
-        IDList.append(str(i.replace("\n", "")))
+    ID = open("botData.json",'r')
+    dataFetchedID = json.load(ID)
+    IDList = dataFetchedID["users"]
+    ID.close()
     return IDList
 
 def isAllow(id):
-    AccessPassAllow = open("SpecialControlPass.txt",'r')
-    idpass = AccessPassAllow.readlines()
+    AccessPassAllow = open("botData.json",'r')
+    idpass = json.load(AccessPassAllow)
     status = 0
-    adminList = []
-    for i in idpass:
-        adminList.append(str(i.replace("\n", "")))
-    if(str(id) in adminList):
+    adminList = idpass["admin"]
+    if(id in adminList):
         status = 1
     else:
         status = 0
+    AccessPassAllow.close()
     if(status == 1):
         return True
     else:
@@ -64,18 +70,31 @@ def isAllow(id):
 
 def control(update:Update,context:CallbackContext):
     commandGiven = update.message.text
-    commandGiven.lower()
     if(commandGiven in ["bye","bubye","byeeeee","Bye","ttyl"]):
         MyBot.send_message(
             chat_id = update.effective_chat.id,
             text = "Bye bye dear... it was great to spend time with you."
         )
-    if(commandGiven=="server name"):
+    if(commandGiven.lower()=="server name"):
         if(isAllow(update.effective_chat.id)):
             MyBot.send_message(
                 chat_id = update.effective_chat.id,
                 text = "VAIO Sony Laptop"
             )
+        else:
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "This access are only given to Admin.So, Sorry!"
+            )
+    if(commandGiven.lower()=="total users"):
+        if(isAllow(update.effective_chat.id)):
+            see_noOfusers = open("botData.json",'r')
+            totalUsers = json.load(see_noOfusers)
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "Total {} users are using this bot now.".format(len(totalUsers["users"]))
+            )
+            see_noOfusers.close()
         else:
             MyBot.send_message(
                 chat_id = update.effective_chat.id,
