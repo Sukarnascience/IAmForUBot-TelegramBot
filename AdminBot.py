@@ -1,161 +1,174 @@
 from telegram import *
 from telegram.ext import *
+import MainBot
 import random
+import AIBot
 import json
-import AdminBot
 
-APIKey = "1607299983:AAHPq93CT_V3wx6NZKduwSgrI4dEWhSrlUs"
+APIKey = "<--- bot key --->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
 DispatchUpToBot = UpdateMyBot.dispatcher
 
-def datatoRead(filename):
-    filename = open(filename,'r')
-    see = filename.readlines()
-    data = ""
-    for i in see:
-        data = data + i
-    return data
-
-def SayingThought(update:Update,context:CallbackContext):
-    thoughtsfile = open("thoughts.txt",'r')
-    takethoughts = thoughtsfile.readlines()
-    pickAnyOne = random.randint(0,len(takethoughts))
+VerifyPassword = range(1)
+def AdminAccis(update:Update,context:CallbackContext):
     MyBot.send_message(
         chat_id = update.effective_chat.id,
-        text = takethoughts[pickAnyOne]
+        text = "Ok, Enter Password"
     )
+    return VerifyPassword
 
-def StartChatting(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = datatoRead("startgide.txt")
-    )
-    if(update.effective_chat.id not in AdminBot.userIDlist()):
-        userIDdetails = open("botData.json",'r')
-        dataLoadofusers = json.load(userIDdetails)
-        userIDdetails.close()
-        adduserID = open("botData.json",'w')
-        dataLoadofusers["users"].append(update.effective_chat.id)
-        json.dump(dataLoadofusers,adduserID,indent=4)
-        adduserID.close()
+def AdminOwnership(update:Update,context:CallbackContext):
+    password = update.message.text
+    passwdFile = open("botData.json",'r')
+    dataFetched = json.load(passwdFile) 
+    seepasswd = dataFetched['password']
+    passwdFile.close()
+    if(password.lower()==seepasswd):
+        MyBot.send_message(
+            chat_id = update.effective_chat.id,
+            text = "Hello Sir/Mam,\nGreat to see you here.. to see gides click on\n[ /Admingide ]"
+        )
+        CAccessPass = open("botData.json",'r')
+        CeditAccessdata = json.load(CAccessPass)
+        CAccessPass.close()
+        if(int(update.effective_chat.id) not in CeditAccessdata["admin"]):
+            AccessPass = open("botData.json",'w')
+            CeditAccessdata["admin"].append(int(update.effective_chat.id))
+            json.dump(CeditAccessdata,AccessPass,indent=4)
+            AccessPass.close()
 
-
-def TheNewthings(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = datatoRead("whatsnew.txt")
-    )
-
-sendingfeed = range(1)
-def UserFeedBack(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = "That's great your feedback is really have a huge value for us.. So, Start typing your feedback :"
-    )
-    return sendingfeed
-def TQforfeeds(update:Update,context:CallbackContext):    
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = "FeedBack Page Close"
-    )   
-    return ConversationHandler.END
-def feedbacktyper(update:Update,context:CallbackContext):
-    thefeedback = update.message.text
-    FeedBackfile = open('FeedBackPage.txt','a')
-    data = '\nUserID{}: Feedback is :- {}'.format(update.effective_chat.id,thefeedback)
-    FeedBackfile.write(data)       
-    FeedBackfile.close()
-
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = "ThankYou for your feedback..."
-    )  
+    else:
+        MyBot.send_message(
+            chat_id = update.effective_chat.id,
+            text = "Access Denide! Sorry"
+        )
     return ConversationHandler.END
 
-EchoChat,EchoSticker = range(2)
-def startingEcho(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = "Starting the Echo.\n[For stoping echo: /stopecho]"
-    )
-    return EchoChat,EchoSticker
-def echoTheText(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = update.message.text
-    )
-def echoTheSticker(update:Update,context:CallbackContext):
-    MyBot.send_sticker(
-        chat_id = update.effective_chat.id,
-        sticker = update.message.sticker.file_id
-    )
-def stopingEcho(update:Update,context:CallbackContext):
-    MyBot.send_message(
-        chat_id = update.effective_chat.id,
-        text = "Echo is stoped now"
-    )
-    return ConversationHandler.END
+def userIDlist():
+    ID = open("botData.json",'r')
+    dataFetchedID = json.load(ID)
+    IDList = dataFetchedID["users"]
+    ID.close()
+    return IDList
 
-def mainControl():
-    StartChat = CommandHandler("start",StartChatting)
-    WhatsNew = CommandHandler(["whatsnew","help"],TheNewthings)
-    AdminGide = CommandHandler("admingide",AdminBot.adminGide)
-    FeedBack = ConversationHandler(
-        entry_points=[CommandHandler("feedback",UserFeedBack)],
-        states={sendingfeed:[MessageHandler(Filters.text,feedbacktyper)]},
-        fallbacks=[CommandHandler("sendfeed",TQforfeeds),MessageHandler(Filters.text,feedbacktyper)]
-    )
-    Thought = CommandHandler(["saythought","quote"],SayingThought)
-    EchoState = ConversationHandler(
-        entry_points=[CommandHandler(["startecho"],startingEcho)],
-        states={
-            EchoChat:[MessageHandler(Filters.text,echoTheText)],
-            EchoSticker:[MessageHandler(Filters.sticker,echoTheSticker)]
-        },
-        fallbacks=[
-            CommandHandler(["stopecho"],stopingEcho),
-            MessageHandler(Filters.text,echoTheText),
-            MessageHandler(Filters.sticker,echoTheSticker)
-        ]
-    )
-    AdminPass = ConversationHandler(
-        entry_points=[CommandHandler(["admin"],AdminBot.AdminAccis)],
-        states={
-            AdminBot.VerifyPassword:[MessageHandler(Filters.text,AdminBot.AdminOwnership)]
-        },
-        fallbacks=[MessageHandler(Filters.text,AdminBot.AdminOwnership)]
-    )
-    NoticeSender = ConversationHandler(
-        entry_points=[CommandHandler(["notice"],AdminBot.notice)],
-        states={
-            AdminBot.sendnoticetousers:[MessageHandler(Filters.text,AdminBot.sendnotice)]
-        },
-        fallbacks=[MessageHandler(Filters.text,AdminBot.sendnotice)]
-    )
-    UsersLocation = ConversationHandler(
-        entry_points=[CommandHandler(["weather"],AdminBot.askingWeather)],
-        states={
-            AdminBot.seeLocation:[MessageHandler(Filters.location,AdminBot.weatherReport)]
-        },
-        fallbacks=[MessageHandler(Filters.location,AdminBot.weatherReport)]
-    )
-    Admincontrol = MessageHandler(Filters.text,AdminBot.control)
-
-    DispatchUpToBot.add_handler(AdminPass)
-    DispatchUpToBot.add_handler(NoticeSender)
-    DispatchUpToBot.add_handler(StartChat)
-    DispatchUpToBot.add_handler(AdminGide)
-    DispatchUpToBot.add_handler(UsersLocation)
-    DispatchUpToBot.add_handler(WhatsNew)
-    DispatchUpToBot.add_handler(FeedBack)
-    DispatchUpToBot.add_handler(Thought)
-    DispatchUpToBot.add_handler(EchoState)
-    DispatchUpToBot.add_handler(Admincontrol)
-
-    UpdateMyBot.start_polling()
-
-if __name__ == "__main__":
-    mainControl()
+def isAllow(id):
+    AccessPassAllow = open("botData.json",'r')
+    idpass = json.load(AccessPassAllow)
+    status = 0
+    adminList = idpass["admin"]
+    if(id in adminList):
+        status = 1
+    else:
+        status = 0
+    AccessPassAllow.close()
+    if(status == 1):
+        return True
+    else:
+        return False
     
+
+def control(update:Update,context:CallbackContext):
+    commandGiven = update.message.text
+    if(commandGiven in ["bye","bubye","byeeeee","Bye","ttyl"]):
+        MyBot.send_message(
+            chat_id = update.effective_chat.id,
+            text = "Bye bye dear... it was great to spend time with you."
+        )
+    elif(commandGiven.lower()=="server name"):
+        if(isAllow(update.effective_chat.id)):
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "VAIO Sony Laptop"
+            )
+        else:
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "This access are only given to Admin.So, Sorry!"
+            )
+    elif(commandGiven.lower()=="total users"):
+        if(isAllow(update.effective_chat.id)):
+            see_noOfusers = open("botData.json",'r')
+            totalUsers = json.load(see_noOfusers)
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "Total {} users are using this bot now.".format(len(totalUsers["users"]))
+            )
+            see_noOfusers.close()
+        else:
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "This access are only given to Admin.So, Sorry!"
+            )
+    else:
+        reply = AIBot.commandsGiven(commandGiven.lower())
+        if(reply != None):
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = reply
+            )
+        else:
+            ai_reply = AIBot.aiReply(commandGiven.lower())
+            MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = ai_reply
+            )
+
+def adminGide(update:Update,context:CallbackContext):
+    if(isAllow(update.effective_chat.id)):
+        MyBot.send_message(
+            chat_id = update.effective_chat.id,
+            text = MainBot.datatoRead("AdminGide.txt")
+        )
+    else:
+        MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "This access are only given to Admin.So, Sorry!"
+            )
+sendnoticetousers = range(1)
+def notice(update:Update,context:CallbackContext):
+    if(isAllow(update.effective_chat.id)):
+        MyBot.send_message(
+            chat_id = update.effective_chat.id,
+            text = "So, what is the message that you want to sent to all users..."
+        )
+        return sendnoticetousers
+    else:
+        MyBot.send_message(
+                chat_id = update.effective_chat.id,
+                text = "This access are only given to Admin.So, Sorry!"
+            )
+        return ConversationHandler.END
+
+def sendnotice(update:Update,context:CallbackContext):
+    noticeis = update.message.text
+    for i in userIDlist():
+        if(i!=""):
+            MyBot.send_message(
+                    chat_id = int(i),
+                    text = noticeis
+                )
+    MyBot.send_message(
+        chat_id = update.effective_chat.id,
+        text = "noticed has been send to everyone.."
+    )
+    return ConversationHandler.END
+
+seeLocation = range(1)
+def askingWeather(update:Update,context:CallbackContext):
+    MyBot.send_message(
+        chat_id = update.effective_chat.id,
+        text = "So, send your location :"
+    )
+    return seeLocation
+def weatherReport(update:Update,context:CallbackContext):
+    userslocation = update.message.location
+    lon = userslocation["longitude"]
+    lat = userslocation["latitude"]
+    forecast = AIBot.weather(lon,lat)
+    MyBot.send_message(
+        chat_id = update.effective_chat.id,
+        text = forecast
+    )
+    return ConversationHandler.END
