@@ -4,7 +4,7 @@ import random
 import json
 import AdminBot
 
-APIKey = "<---- bot key ---->"
+APIKey = "<--- bot key --->"
 MyBot = Bot(APIKey)
 
 UpdateMyBot = Updater(APIKey,use_context=True)
@@ -134,13 +134,20 @@ def mainControl():
         },
         fallbacks=[MessageHandler(Filters.text,AdminBot.sendnotice)]
     )
-
+    UsersLocation = ConversationHandler(
+        entry_points=[CommandHandler(["weather"],AdminBot.askingWeather)],
+        states={
+            AdminBot.seeLocation:[MessageHandler(Filters.location,AdminBot.weatherReport)]
+        },
+        fallbacks=[MessageHandler(Filters.location,AdminBot.weatherReport)]
+    )
     Admincontrol = MessageHandler(Filters.text,AdminBot.control)
 
     DispatchUpToBot.add_handler(AdminPass)
     DispatchUpToBot.add_handler(NoticeSender)
     DispatchUpToBot.add_handler(StartChat)
     DispatchUpToBot.add_handler(AdminGide)
+    DispatchUpToBot.add_handler(UsersLocation)
     DispatchUpToBot.add_handler(WhatsNew)
     DispatchUpToBot.add_handler(FeedBack)
     DispatchUpToBot.add_handler(Thought)
