@@ -15,3 +15,5 @@ This is a Telegram Bot were i tried to become a sweet companion and help you wit
 * Echo your chats... (Just for fun)
 * giving weather report of your location...
 * admin has some more extra feature
+
+License Under : [GNU GPLv3 License](LICENSE)
